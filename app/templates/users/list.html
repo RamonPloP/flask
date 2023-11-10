@@ -1,0 +1,9 @@
+{% extends 'users.html' %}
+
+{% block content %}
+    {% for i in data.db %}
+        <li><p>ID: {{ i._id }}
+            <br>Name: {{ i.name }}
+            <br>Email: {{ i.email }}</p></li>
+    {% endfor %}
+{% endblock %}

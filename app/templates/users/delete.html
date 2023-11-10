@@ -1,0 +1,35 @@
+{% extends 'users.html' %}
+
+{% block content %}
+<form class="container" action="{{ url_for('delete') }}" method="post" id="deleteForm">
+    <input class="input" name="id" type="text" placeholder="ID del usuario a eliminar">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Eliminar</button>
+</form>
+
+<script>
+    document.getElementById('deleteForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var confirmar = confirm('¿Estás seguro de que deseas eliminar este usuario?');
+    if (confirmar) {
+        fetch('{{ url_for('delete') }}', {
+            method: 'DELETE',
+            body: new URLSearchParams(new FormData(this)),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '{{ url_for('listUsers') }}';
+            } else {
+                alert('Error al eliminar el usuario.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
+</script>
+
+{% endblock %}

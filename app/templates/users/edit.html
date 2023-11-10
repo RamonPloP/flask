@@ -1,0 +1,36 @@
+{% extends 'users.html' %}
+
+{% block content %}
+<form method='POST' class="container" id="editForm">
+    <input class="input" name="id" type="text" placeholder="ID de usuario">
+    <button type="button" onclick="buscarUsuario()">Buscar</button>
+    <input class="input" name="name" type="text" placeholder="Nombre">
+    <input class="input" name="email" type="text" placeholder="Correo electrónico">
+    <input type="hidden" name="id" value="">
+    <button type="submit">Guardar cambios</button>
+</form>
+
+<script>
+    function buscarUsuario() {
+        var id = document.querySelector('input[name="id"]').value;
+        fetch('{{ url_for('search') }}', {
+            method: 'POST',
+            body: new URLSearchParams({'id': id}),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.querySelector('input[name="name"]').value = data.name;
+                document.querySelector('input[name="email"]').value = data.email;
+                document.querySelector('input[name="id"]').value = data.id;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+{% endblock %}
