@@ -1,0 +1,13 @@
+{% extends 'tags.html' %}
+
+{% block title %}
+    {{ data.title }}
+{% endblock %}
+
+{% block content %}
+<form method="POST" class="container">
+    <input class="input" type="text" name="name" placeholder="Nombre">
+    <input class="input" type="text" name="url" placeholder="Url">
+    <button class="add">Agregar</button>
+</form>
+{% endblock %}

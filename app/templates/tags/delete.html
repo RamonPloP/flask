@@ -1,8 +1,8 @@
-{% extends 'users.html' %}
+{% extends 'tags.html' %}
 
 {% block content %}
 <form class="container" method="post" id="deleteForm">
-    <input class="input" name="id" id="inputid" type="text" placeholder="ID del usuario a eliminar">
+    <input class="input" name="id" id="inputid" type="text" placeholder="ID del tag a eliminar">
     <input type="hidden" name="_method" value="DELETE">
     <button type="submit">Eliminar</button>
 </form>
@@ -10,9 +10,9 @@
 <script>
 document.getElementById('deleteForm').addEventListener('submit', function(event) {
     event.preventDefault();
-    var confirmar = confirm('¿Estás seguro de que deseas eliminar este usuario?');
+    var confirmar = confirm('¿Estás seguro de que deseas eliminar este tag?');
     if (confirmar) {
-        fetch('{{ url_for('deleteUser') }}', {
+        fetch('{{ url_for('deleteTag') }}', {
             method: 'DELETE',
             body: new URLSearchParams(new FormData(this)),
             headers: {
@@ -22,11 +22,11 @@ document.getElementById('deleteForm').addEventListener('submit', function(event)
         .then(response => {
             if (response.ok) {
                 // Si la respuesta es exitosa, redirige a la página de listado
-                window.location.href = '{{ url_for('listUsers') }}';
+                window.location.href = '{{ url_for('listTags') }}';
             } else {
                 // Si la respuesta indica un error, muestra un mensaje de alerta
                 return response.text().then(error => {
-                    alert('Error al eliminar el usuario: ' + error);
+                    alert('Error al eliminar el Tag: ' + error);
                 });
             }
         })
