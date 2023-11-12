@@ -1,0 +1,13 @@
+{% extends 'articles.html' %}
+
+{% block content %}
+    {% for i in data.db %}
+        <li>
+        <p>
+            ID: {{ i._id }}
+            <br>Titulo: {{ i.title }}
+            <br>Fecha: {{ i.date }}
+            <br>Texto: {{ i.text }}
+        </p></li>
+    {% endfor %}
+{% endblock %}

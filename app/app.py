@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from pymongo import MongoClient
 from bson import ObjectId
+from datetime import datetime
 
 client = MongoClient('localhost',27017)
 db = client.blog
@@ -10,6 +11,7 @@ users_col = db.users
 tags_col = db.tags
 cats_col = db.categories
 coms_col = db.comments
+arts_col = db.articles
 
 app = Flask(__name__)
 
@@ -312,6 +314,79 @@ def deleteCom():
     }
     return render_template('/comments/delete.html', data=data)
 #-------------------------------------------------------
+
+# Articulos-----------------------------------------------
+
+@app.route('/articles')
+def articles():
+    data = {
+        "title": "Articulos"
+    }
+    return render_template('/articles.html', data=data)
+
+@app.route('/articles/addart', methods =['GET','POST'])
+def addArt():
+    if request.method == 'POST':
+        date = str(datetime.now())
+        title = request.form['title']
+        text = request.form['text']
+        art = {
+            "title": title,
+            "text": text,
+            "date": date
+        }
+        arts_col.insert_one(art)
+        return redirect(url_for('addArt'))
+    data = {
+        "title": "Agregar Articulo",
+        "db": users
+    }
+    return render_template('/articles/add.html',data=data)
+
+@app.route('/articles/listarts')
+def listArts():
+    lista = list(arts_col.find())
+    data={
+        "title": "Listar Articulos",
+        "db": lista
+    }
+    return render_template('/articles/list.html',data=data)
+
+@app.route('/articles/editart', methods=['POST','GET'])
+def editArt():
+    if request.method == 'POST':
+        art_id = request.form['id']
+        new_title = request.form['title']
+        new_text = request.form['text']
+        arts_col.update_one({"_id": ObjectId(art_id)}, {"$set": {"title": new_title, "text": new_text}})
+        return redirect(url_for('editArt'))
+    data = {
+        "title": "Editar Articulo"
+    }
+    return render_template('/articles/edit.html', data=data)
+
+@app.route('/articles/searchart', methods=['POST','GET'])
+def searchArt():
+    if request.method == 'POST':
+        id = request.form['id']
+        art = arts_col.find_one({"_id": ObjectId(id)})
+        if art:
+            return jsonify({'title': art['title'], 'text': art['text'], 'id': id})
+        else:
+            return jsonify({'error': 'Articulo no encontrada'})
+
+@app.route('/articles/deletert', methods=['GET','DELETE'])
+def deleteArt():
+    if request.method == 'DELETE':
+        id = request.form['id']
+        arts_col.delete_one({"_id": ObjectId(id)})
+        return redirect(url_for('deleteArt'))
+    data={
+        "title": "Eliminar Articulo",
+        "db": tags
+    }
+    return render_template('/articles/delete.html', data=data)
+#---------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)

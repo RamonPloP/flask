@@ -1,0 +1,37 @@
+{% extends 'articles.html' %}
+
+{% block content %}
+<form method='POST' class="container" id="editForm">
+    <input class="input" name="id" type="text" placeholder="ID de Articulo">
+    <button type="button" onclick="buscarUsuario()">Buscar</button>
+
+    <input class="input" name="title" type="text" placeholder="Titulo">
+    <input class="input" name="text" type="text" placeholder="Texto">
+    <input type="hidden" name="id" value="">
+    <button type="submit">Guardar cambios</button>
+</form>
+
+<script>
+    function buscarUsuario() {
+        var id = document.querySelector('input[name="id"]').value;
+        fetch('{{ url_for('searchArt') }}', {
+            method: 'POST',
+            body: new URLSearchParams({'id': id}),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                document.querySelector('input[name="title"]').value = data.title;
+                document.querySelector('input[name="text"]').value = data.text;
+                document.querySelector('input[name="id"]').value = data.id;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+{% endblock %}
