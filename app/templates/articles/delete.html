@@ -2,19 +2,26 @@
 
 {% block content %}
 <form class="container" method="post" id="deleteForm">
-    <input class="input" name="id" id="inputid" type="text" placeholder="ID del articulo a eliminar">
+    <input class="input" name="id" id="inputid" type="text" placeholder="ID del artículo a eliminar">
     <input type="hidden" name="_method" value="DELETE">
+    <select class="input" name="iduser">
+        {% for user in data.users_list %}
+            <option value="{{ user._id }}">{{ user.name }}:   {{ user._id }}</option>
+        {% endfor %}
+    </select>
     <button type="submit">Eliminar</button>
 </form>
 
 <script>
 document.getElementById('deleteForm').addEventListener('submit', function(event) {
     event.preventDefault();
-    var confirmar = confirm('¿Estás seguro de que deseas eliminar este articulo?');
+    var confirmar = confirm('¿Estás seguro de que deseas eliminar este artículo?');
     if (confirmar) {
-        fetch('{{ url_for('deleteArt') }}', {
+        var userId = document.querySelector('select[name="iduser"]').value;
+        var artId = document.querySelector('input[name="id"]').value;
+
+        fetch('{{ url_for('deleteArt', user_id='USER_ID', art_id='ART_ID') }}'.replace('USER_ID', userId).replace('ART_ID', artId), {
             method: 'DELETE',
-            body: new URLSearchParams(new FormData(this)),
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -24,7 +31,7 @@ document.getElementById('deleteForm').addEventListener('submit', function(event)
                 window.location.href = '{{ url_for('listArts') }}';
             } else {
                 return response.text().then(error => {
-                    alert('Error al eliminar el Articulo: ' + error);
+                    alert('Error al eliminar el artículo: ' + error);
                 });
             }
         })
@@ -34,8 +41,6 @@ document.getElementById('deleteForm').addEventListener('submit', function(event)
         .catch(error => console.error('Error:', error));
     }
 });
-
 </script>
-
 
 {% endblock %}

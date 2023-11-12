@@ -3,7 +3,8 @@
 {% block content %}
     {% for i in data.db %}
         <li><p>ID: {{ i._id }}
-            <br>Name: {{ i.name }}
-            <br>URL: {{ i.url }}</p></li>
+            <br>Usuario: {{ i.iduser }}
+            <br>Articulo: {{ i.idart }}
+            <br>Texto: {{ i.text }}    </p></li>
     {% endfor %}
 {% endblock %}

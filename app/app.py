@@ -11,7 +11,6 @@ users_col = db.users
 tags_col = db.tags
 cats_col = db.categories
 coms_col = db.comments
-arts_col = db.articles
 
 app = Flask(__name__)
 
@@ -39,7 +38,8 @@ def addUser():
         email = request.form['email']
         user = {
             "name": name,
-            "email": email
+            "email": email,
+            "articles": []
         }
         users_col.insert_one(user)
         return redirect(url_for('addUser'))
@@ -109,10 +109,8 @@ def tags():
 def addTag():
     if request.method == 'POST':
         name = request.form['name']
-        url = request.form['url']
         tag = {
-            "name": name,
-            "url": url
+            "name": name
         }
         tags_col.insert_one(tag)
         return redirect(url_for('addTag'))
@@ -136,9 +134,7 @@ def editTag():
     if request.method == 'POST':
         tag_id = request.form['id']
         new_name = request.form['name']
-        new_url = request.form['url']  # Corregir el nombre del campo a 'url'
-        print(request.form)
-        tags_col.update_one({"_id": ObjectId(tag_id)}, {"$set": {"name": new_name, "url": new_url}})
+        tags_col.update_one({"_id": ObjectId(tag_id)}, {"$set": {"name": new_name}})
         return redirect(url_for('editTag'))
     data = {
         "title": "Editar Tag"
@@ -153,7 +149,7 @@ def searchTag():
         id = request.form['id']
         tag = tags_col.find_one({"_id": ObjectId(id)})
         if tag:
-            return jsonify({'name': tag['name'], 'url': tag['url'], 'id': id})
+            return jsonify({'name': tag['name'], 'id': id})
         else:
             return jsonify({'error': 'Tag no encontrado'})
 
@@ -184,10 +180,8 @@ def categories():
 def addCat():
     if request.method == 'POST':
         name = request.form['name']
-        url = request.form['url']
         cat = {
-            "name": name,
-            "url": url
+            "name": name
         }
         cats_col.insert_one(cat)
         return redirect(url_for('addCat'))
@@ -211,8 +205,7 @@ def editCat():
     if request.method == 'POST':
         cat_id = request.form['id']
         new_name = request.form['name']
-        new_url = request.form['url']
-        cats_col.update_one({"_id": ObjectId(cat_id)}, {"$set": {"name": new_name, "url": new_url}})
+        cats_col.update_one({"_id": ObjectId(cat_id)}, {"$set": {"name": new_name}})
         return redirect(url_for('editCat'))
     data = {
         "title": "Editar Categoria"
@@ -224,9 +217,9 @@ def editCat():
 def searchCat():
     if request.method == 'POST':
         id = request.form['id']
-        tag = cats_col.find_one({"_id": ObjectId(id)})
-        if tag:
-            return jsonify({'name': tag['name'], 'url': tag['url'], 'id': id})
+        cat = cats_col.find_one({"_id": ObjectId(id)})
+        if cat:
+            return jsonify({'name': cat['name'],'id': id})
         else:
             return jsonify({'error': 'Categoria no encontrada'})
 
@@ -256,17 +249,28 @@ def comments():
 @app.route('/comments/addcom', methods =['GET','POST'])
 def addCom():
     if request.method == 'POST':
-        name = request.form['name']
-        url = request.form['url']
+        iduser = request.form['iduser']
+        idart = request.form['idart']
+        text = request.form['text']
         com = {
-            "name": name,
-            "url": url
+            "iduser": iduser,
+            "idart": idart,
+            "text": text
         }
         coms_col.insert_one(com)
         return redirect(url_for('addCom'))
+        
+    users_list = list(users_col.find())
+    arts_list = []
+    for user in users_list:
+        user_articles = user.get('articles', [])  # Obtener la lista de artículos del usuario
+        arts_list.extend(user_articles)
+
     data = {
         "title": "Agregar Comentario",
-        "db": users
+        "db": users,
+        "arts_list": arts_list,
+        "users_list": users_list
     }
     return render_template('/comments/add.html',data=data)
 
@@ -283,9 +287,8 @@ def listComs():
 def editCom():
     if request.method == 'POST':
         com_id = request.form['id']
-        new_name = request.form['name']
-        new_url = request.form['url']
-        coms_col.update_one({"_id": ObjectId(com_id)}, {"$set": {"name": new_name, "url": new_url}})
+        text = request.form['text']
+        coms_col.update_one({"_id": ObjectId(com_id)}, {"$set": {"text": text}})
         return redirect(url_for('editCom'))
     data = {
         "title": "Editar Comentario"
@@ -298,7 +301,7 @@ def searchCom():
         id = request.form['id']
         com = coms_col.find_one({"_id": ObjectId(id)})
         if com:
-            return jsonify({'name': com['name'], 'url': com['url'], 'id': id})
+            return jsonify({'iduser': com['iduser'], 'idart': com['idart'], 'text': com['text'], 'id': id})
         else:
             return jsonify({'error': 'Comentario no encontrada'})
 
@@ -330,27 +333,53 @@ def addArt():
         date = str(datetime.now())
         title = request.form['title']
         text = request.form['text']
+        userid = request.form['iduser']
+        tagid = request.form['idtag']
+        catid = request.form['idcat']
         art = {
             "title": title,
             "text": text,
-            "date": date
+            "date": date,
+            "tagid": tagid,
+            "catid": catid
         }
-        arts_col.insert_one(art)
+        users_col.update_one({"_id": ObjectId(userid)}, {"$push": {"articles": art}})
         return redirect(url_for('addArt'))
+    users_list = list(users_col.find())
+    tags_list = list(tags_col.find())
+    cats_list = list(cats_col.find())
     data = {
         "title": "Agregar Articulo",
-        "db": users
+        "db": users,
+        "users_list": users_list,
+        "tags_list": tags_list,
+        "cats_list": cats_list
     }
     return render_template('/articles/add.html',data=data)
 
 @app.route('/articles/listarts')
 def listArts():
-    lista = list(arts_col.find())
-    data={
+    # Obtener todos los usuarios
+    users_list = list(users_col.find())
+
+    # Inicializar una lista para almacenar todos los artículos
+    all_articles = []
+
+    # Recorrer cada usuario y obtener sus artículos
+    for user in users_list:
+        user_articles = user.get('articles', [])  # Obtener la lista de artículos del usuario
+        all_articles.extend(user_articles)
+
+    # Crear el objeto 'data' con la lista completa de artículos
+    data = {
         "title": "Listar Articulos",
-        "db": lista
+        "db": all_articles
     }
-    return render_template('/articles/list.html',data=data)
+
+    return render_template('/articles/list.html', data=data)
+
+
+
 
 @app.route('/articles/editart', methods=['POST','GET'])
 def editArt():
@@ -375,17 +404,6 @@ def searchArt():
         else:
             return jsonify({'error': 'Articulo no encontrada'})
 
-@app.route('/articles/deletert', methods=['GET','DELETE'])
-def deleteArt():
-    if request.method == 'DELETE':
-        id = request.form['id']
-        arts_col.delete_one({"_id": ObjectId(id)})
-        return redirect(url_for('deleteArt'))
-    data={
-        "title": "Eliminar Articulo",
-        "db": tags
-    }
-    return render_template('/articles/delete.html', data=data)
 #---------------------------------------------------------------
 
 if __name__ == '__main__':

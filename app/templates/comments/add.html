@@ -6,8 +6,17 @@
 
 {% block content %}
 <form method="POST" class="container">
-    <input class="input" type="text" name="name" placeholder="Nombre">
-    <input class="input" type="text" name="url" placeholder="Url">
+    <select class="input" name="iduser">
+        {% for user in data.users_list %}
+            <option value="{{ user._id }}">{{ user.name }}:  {{ user._id }}</option>
+        {% endfor %}
+    </select>
+    <select class="input" name="idart">
+        {% for art in data.arts_list %}
+            <option value="{{ art._id }}">{{ art.title }}:  {{ art._id }}</option>
+        {% endfor %}
+    </select>
+    <input class="input" type="text" name="text" id="text" placeholder="Texto">
     <button class="add">Agregar</button>
 </form>
 {% endblock %}
