@@ -1,0 +1,44 @@
+{% extends 'categories.html' %}
+
+{% block content %}
+<form class="container" method="post" id="deleteForm">
+    <input class="input" name="id" id="inputid" type="text" placeholder="ID de categoria a eliminar">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Eliminar</button>
+</form>
+
+<script>
+document.getElementById('deleteForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var confirmar = confirm('¿Estás seguro de que deseas eliminar esta categoria?');
+    if (confirmar) {
+        fetch('{{ url_for('deleteCat') }}', {
+            method: 'DELETE',
+            body: new URLSearchParams(new FormData(this)),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Si la respuesta es exitosa, redirige a la página de listado
+                window.location.href = '{{ url_for('listCats') }}';
+            } else {
+                // Si la respuesta indica un error, muestra un mensaje de alerta
+                return response.text().then(error => {
+                    alert('Error al eliminar la categoria: ' + error);
+                });
+            }
+        })
+        .then(() => {
+            // Después de la redirección, limpia el input
+            document.getElementById("inputid").value = "";
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
+</script>
+
+
+{% endblock %}

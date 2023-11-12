@@ -1,8 +1,8 @@
-{% extends 'tags.html' %}
+{% extends 'comentarios.html' %}
 
 {% block content %}
 <form method='POST' class="container" id="editForm">
-    <input class="input" name="id" type="text" placeholder="ID de Tag">
+    <input class="input" name="id" type="text" placeholder="ID de Comentario">
     <button type="button" onclick="buscarUsuario()">Buscar</button>
     <input class="input" name="name" type="text" placeholder="Nombre">
     <input class="input" name="url" type="text" placeholder="URL">
@@ -13,7 +13,7 @@
 <script>
     function buscarUsuario() {
         var id = document.querySelector('input[name="id"]').value;
-        fetch('{{ url_for('searchTag') }}', {
+        fetch('{{ url_for('searchCom') }}', {
             method: 'POST',
             body: new URLSearchParams({'id': id}),
             headers: {

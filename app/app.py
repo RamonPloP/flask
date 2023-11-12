@@ -8,6 +8,8 @@ db = client.blog
 # Declaracion para coleccion users
 users_col = db.users
 tags_col = db.tags
+cats_col = db.categories
+coms_col = db.comments
 
 app = Flask(__name__)
 
@@ -132,13 +134,15 @@ def editTag():
     if request.method == 'POST':
         tag_id = request.form['id']
         new_name = request.form['name']
-        new_url = request.form['url']
-        tags_col.update_one({"_id": ObjectId(tag_id)}, {"$set": {"name": new_name, "tag": new_url}})
+        new_url = request.form['url']  # Corregir el nombre del campo a 'url'
+        print(request.form)
+        tags_col.update_one({"_id": ObjectId(tag_id)}, {"$set": {"name": new_name, "url": new_url}})
         return redirect(url_for('editTag'))
     data = {
         "title": "Editar Tag"
     }
     return render_template('/tags/edit.html', data=data)
+
 
 
 @app.route('/tags/searchtag', methods=['POST','GET'])
@@ -165,6 +169,149 @@ def deleteTag():
 
 #----------------------------------------------------
 
+# Categories -----------------------------------------
+
+@app.route('/categories')
+def categories():
+    data = {
+        "title": "Tags"
+    }
+    return render_template('/categories.html', data=data)
+
+@app.route('/categories/addcat', methods =['GET','POST'])
+def addCat():
+    if request.method == 'POST':
+        name = request.form['name']
+        url = request.form['url']
+        cat = {
+            "name": name,
+            "url": url
+        }
+        cats_col.insert_one(cat)
+        return redirect(url_for('addCat'))
+    data = {
+        "title": "Agregar Categoria",
+        "db": users
+    }
+    return render_template('/categories/add.html',data=data)
+
+@app.route('/categories/listcats')
+def listCats():
+    lista = list(cats_col.find())
+    data={
+        "title": "Listar Categorias",
+        "db": lista
+    }
+    return render_template('/categories/list.html',data=data)
+
+@app.route('/categories/editcat', methods=['POST','GET'])
+def editCat():
+    if request.method == 'POST':
+        cat_id = request.form['id']
+        new_name = request.form['name']
+        new_url = request.form['url']
+        cats_col.update_one({"_id": ObjectId(cat_id)}, {"$set": {"name": new_name, "url": new_url}})
+        return redirect(url_for('editCat'))
+    data = {
+        "title": "Editar Categoria"
+    }
+    return render_template('/categories/edit.html', data=data)
+
+
+@app.route('/categories/searchcat', methods=['POST','GET'])
+def searchCat():
+    if request.method == 'POST':
+        id = request.form['id']
+        tag = cats_col.find_one({"_id": ObjectId(id)})
+        if tag:
+            return jsonify({'name': tag['name'], 'url': tag['url'], 'id': id})
+        else:
+            return jsonify({'error': 'Categoria no encontrada'})
+
+@app.route('/categories/deletecat', methods=['GET','DELETE'])
+def deleteCat():
+    if request.method == 'DELETE':
+        id = request.form['id']
+        cats_col.delete_one({"_id": ObjectId(id)})
+        return redirect(url_for('deleteCat'))
+    data={
+        "title": "Eliminar Categoria",
+        "db": tags
+    }
+    return render_template('/categories/delete.html', data=data)
+
+#----------------------------------------------------
+
+# Coments -------------------------------------------
+
+@app.route('/comments')
+def comments():
+    data = {
+        "title": "Comentarios"
+    }
+    return render_template('/comentarios.html', data=data)
+
+@app.route('/comments/addcom', methods =['GET','POST'])
+def addCom():
+    if request.method == 'POST':
+        name = request.form['name']
+        url = request.form['url']
+        com = {
+            "name": name,
+            "url": url
+        }
+        coms_col.insert_one(com)
+        return redirect(url_for('addCom'))
+    data = {
+        "title": "Agregar Comentario",
+        "db": users
+    }
+    return render_template('/comments/add.html',data=data)
+
+@app.route('/comments/listcoms')
+def listComs():
+    lista = list(coms_col.find())
+    data={
+        "title": "Listar Categorias",
+        "db": lista
+    }
+    return render_template('/comments/list.html',data=data)
+
+@app.route('/comments/editcom', methods=['POST','GET'])
+def editCom():
+    if request.method == 'POST':
+        com_id = request.form['id']
+        new_name = request.form['name']
+        new_url = request.form['url']
+        coms_col.update_one({"_id": ObjectId(com_id)}, {"$set": {"name": new_name, "url": new_url}})
+        return redirect(url_for('editCom'))
+    data = {
+        "title": "Editar Comentario"
+    }
+    return render_template('/comments/edit.html', data=data)
+
+@app.route('/comments/searchcom', methods=['POST','GET'])
+def searchCom():
+    if request.method == 'POST':
+        id = request.form['id']
+        com = coms_col.find_one({"_id": ObjectId(id)})
+        if com:
+            return jsonify({'name': com['name'], 'url': com['url'], 'id': id})
+        else:
+            return jsonify({'error': 'Comentario no encontrada'})
+
+@app.route('/comments/deletecom', methods=['GET','DELETE'])
+def deleteCom():
+    if request.method == 'DELETE':
+        id = request.form['id']
+        coms_col.delete_one({"_id": ObjectId(id)})
+        return redirect(url_for('deleteCom'))
+    data={
+        "title": "Eliminar Comentario",
+        "db": tags
+    }
+    return render_template('/comments/delete.html', data=data)
+#-------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)

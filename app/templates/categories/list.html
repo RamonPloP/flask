@@ -1,0 +1,9 @@
+{% extends 'categories.html' %}
+
+{% block content %}
+    {% for i in data.db %}
+        <li><p>ID: {{ i._id }}
+            <br>Name: {{ i.name }}
+            <br>URL: {{ i.url }}</p></li>
+    {% endfor %}
+{% endblock %}

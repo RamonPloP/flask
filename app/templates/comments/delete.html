@@ -1,0 +1,41 @@
+{% extends 'comentarios.html' %}
+
+{% block content %}
+<form class="container" method="post" id="deleteForm">
+    <input class="input" name="id" id="inputid" type="text" placeholder="ID del comentario a eliminar">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">Eliminar</button>
+</form>
+
+<script>
+document.getElementById('deleteForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var confirmar = confirm('¿Estás seguro de que deseas eliminar este comentario?');
+    if (confirmar) {
+        fetch('{{ url_for('deleteCom') }}', {
+            method: 'DELETE',
+            body: new URLSearchParams(new FormData(this)),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '{{ url_for('listComs') }}';
+            } else {
+                return response.text().then(error => {
+                    alert('Error al eliminar el Tag: ' + error);
+                });
+            }
+        })
+        .then(() => {
+            document.getElementById("inputid").value = "";
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+
+</script>
+
+
+{% endblock %}
